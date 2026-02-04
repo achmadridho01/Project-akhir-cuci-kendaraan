@@ -39,7 +39,7 @@
             </div>
 
             <button class="btn btn-success">Simpan & Buat Member</button>
-            <a href="{{ route('member.index') }}" class="btn btn-secondary mb-3"> Kembali</a>
+            <a href="{{ route('member.index') }}" class="btn btn-secondary "> Kembali</a>
     </div>
 </div>
 
