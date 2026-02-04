@@ -13,10 +13,10 @@ class DashboardController extends Controller
     public function index()
     {
         // Total Pendapatan
-        $totalPendapatan = Transaksi::sum('total_harga');
+        $totalPendapatan = Transaksis::sum('total_harga');
 
         // Total Transaksi Hari Ini
-        $transaksiHariIni = Transaksi::whereDate('created_at', now()->toDateString())->count();
+        $transaksiHariIni = Transaksis::whereDate('created_at', now()->toDateString())->count();
 
         // Pendapatan per paket cuci (pakai subtotal)
         $pendapatanPerPaket = PaketCuci::leftJoin('transaksi_item', 'paket_cuci.id', '=', 'transaksi_item.paket_cuci_id')
