@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kendaraan;
 use App\Models\TipeKendaraan;
-use App\Models\Member;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class KendaraanController extends Controller
 {
@@ -32,24 +30,11 @@ class KendaraanController extends Controller
             'tipe_kendaraan_id'  => 'required|exists:tipe_kendaraan,id',
         ]);
 
-        /**
-         * 1️⃣ Cari atau buat MEMBER berdasarkan telepon
-         */
-        $member = Member::where('telepon', $request->telepon)->first();
+        // ❌ TIDAK membuat member otomatis
+        // ✅ Kendaraan disimpan tanpa member
 
-        if (!$member) {
-            $member = Member::create([
-                'kode_member' => 'MBR-' . strtoupper(Str::random(6)),
-                'nama_member'        => $request->nama_pemilik,
-                'telepon'     => $request->telepon,
-            ]);
-        }
-
-        /**
-         * 2️⃣ Simpan kendaraan ke MEMBER
-         */
         Kendaraan::create([
-            'member_id'          => $member->id,
+            'member_id'          => null,
             'nama_pemilik'       => $request->nama_pemilik,
             'telepon'            => $request->telepon,
             'no_plat'            => $request->no_plat,
@@ -59,7 +44,7 @@ class KendaraanController extends Controller
 
         return redirect()
             ->route('kendaraan.index')
-            ->with('success', 'Kendaraan berhasil ditambahkan & Member otomatis dibuat');
+            ->with('success', 'Kendaraan berhasil ditambahkan');
     }
 
     public function edit($id)
@@ -104,39 +89,37 @@ class KendaraanController extends Controller
             ->with('success', 'Kendaraan berhasil dihapus');
     }
 
-  public function searchNama(Request $request)
-{
-    $q = $request->q;
+    // 🔍 Search kendaraan yang BELUM punya member
+    public function searchNama(Request $request)
+    {
+        $q = $request->q;
 
-    return Kendaraan::with('tipeKendaraan')
-        ->where('nama_pemilik', 'like', "%$q%")
-        ->whereNull('member_id')   // hanya kendaraan yg belum jadi member
-        ->limit(10)
-        ->get()
-        ->map(function($k){
-            return [
-                'id' => $k->id,
-                'nama' => $k->nama_pemilik,
-                'telepon' => $k->telepon,
-                'no_plat' => $k->no_plat,
-                'tipe' => $k->tipeKendaraan->nama_tipe ?? '-'
-            ];
-        });
-}
+        return Kendaraan::with('tipeKendaraan')
+            ->where('nama_pemilik', 'like', "%$q%")
+            ->whereNull('member_id')
+            ->limit(10)
+            ->get()
+            ->map(function ($k) {
+                return [
+                    'id'      => $k->id,
+                    'nama'    => $k->nama_pemilik,
+                    'telepon' => $k->telepon,
+                    'no_plat' => $k->no_plat,
+                    'tipe'    => $k->tipeKendaraan->nama_tipe ?? '-',
+                ];
+            });
+    }
 
+    public function detail($id)
+    {
+        $k = Kendaraan::with('tipeKendaraan')->findOrFail($id);
 
-public function detail($id)
-{
-    $k = Kendaraan::with('tipeKendaraan')->findOrFail($id);
-
-    return [
-        'id' => $k->id,
-        'nama' => $k->nama_pemilik,
-        'telepon' => $k->telepon,
-        'no_plat' => $k->no_plat,
-        'tipe' => $k->tipeKendaraan->nama_tipe ?? '-'
-    ];
-}
-
-
+        return [
+            'id'      => $k->id,
+            'nama'    => $k->nama_pemilik,
+            'telepon' => $k->telepon,
+            'no_plat' => $k->no_plat,
+            'tipe'    => $k->tipeKendaraan->nama_tipe ?? '-',
+        ];
+    }
 }
