@@ -34,7 +34,7 @@ class KendaraanController extends Controller
         // ✅ Kendaraan disimpan tanpa member
 
         Kendaraan::create([
-            'member_id'          => null,
+            'member_id'          => $request->member_id,
             'nama_pemilik'       => $request->nama_pemilik,
             'telepon'            => $request->telepon,
             'no_plat'            => $request->no_plat,
