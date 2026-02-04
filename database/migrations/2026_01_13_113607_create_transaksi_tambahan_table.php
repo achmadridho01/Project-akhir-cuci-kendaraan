@@ -4,43 +4,51 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-  public function up()
-{
-    Schema::create('transaksi_tambahan', function (Blueprint $table) {
-        $table->id();
+return new class extends Migration {
 
-        $table->unsignedBigInteger('transaksi_id');
-        $table->unsignedBigInteger('paket_tambahan_id');
+    public function up(): void
+    {
+        Schema::create('transaksi', function (Blueprint $table) {
+            $table->id();
 
-        $table->integer('qty')->default(1);
-        $table->integer('subtotal');
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
-        $table->timestamps();
+            $table->foreignId('kendaraan_id')
+                ->nullable()
+                ->constrained('kendaraan')
+                ->nullOnDelete();
 
-        // FOREIGN KEY MANUAL (INI KUNCINYA 🔥)
-        $table->foreign('transaksi_id')
-              ->references('id')
-              ->on('transaksi')
-              ->onDelete('cascade');
+            // 🔥 INI PENTING UNTUK DISKON MEMBER
+            $table->foreignId('member_id')
+                ->nullable()
+                ->constrained('members')
+                ->nullOnDelete();
 
-        $table->foreign('paket_tambahan_id')
-              ->references('id')
-              ->on('paket_tambahan')
-              ->onDelete('cascade');
-    });
-}
+            $table->string('nama_pelanggan')->nullable();
+            $table->string('no_polisi')->nullable();
 
+            $table->foreignId('tipe_kendaraan_id')
+                ->constrained('tipe_kendaraan');
 
-    /**
-     * Reverse the migrations.
-     */
+            $table->integer('total_harga')->default(0);
+
+            // 🔥 DISKON & TOTAL AKHIR
+            $table->integer('diskon')->default(0); // persen
+            $table->integer('total_setelah_diskon')->default(0);
+
+            $table->string('metode_pembayaran')->nullable();
+            $table->integer('bayar')->nullable();
+            $table->integer('kembalian')->nullable();
+            $table->timestamp('waktu_transaksi')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
     public function down(): void
     {
-        Schema::dropIfExists('transaksi_tambahan');
+        Schema::dropIfExists('transaksi'); // ❗ perbaikan
     }
 };

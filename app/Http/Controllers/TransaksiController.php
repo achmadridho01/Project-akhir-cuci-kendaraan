@@ -12,7 +12,6 @@ use App\Models\PaketHarga;
 use App\Models\PaketTambahan;
 use App\Models\Member;
 
-
 class TransaksiController extends Controller
 {
     public function create()
@@ -33,7 +32,7 @@ class TransaksiController extends Controller
 
         DB::transaction(function () use ($request, &$transaksi) {
 
-            // SIMPAN KENDARAAN
+            // ================= KENDARAAN =================
             $kendaraan = Kendaraan::firstOrCreate(
                 ['no_plat' => $request->no_plat],
                 [
@@ -44,21 +43,27 @@ class TransaksiController extends Controller
                 ]
             );
 
-            // SIMPAN TRANSAKSI
+            // ambil member dari kendaraan (jika ada)
+            $member = $kendaraan->member;
+
+            // ================= TRANSAKSI =================
             $transaksi = Transaksi::create([
                 'user_id' => auth()->id(),
                 'kendaraan_id' => $kendaraan->id,
+                'member_id' => $member?->id,
                 'nama_pelanggan' => $request->nama_pelanggan,
                 'no_polisi' => $request->no_plat,
                 'tipe_kendaraan_id' => $request->tipe_kendaraan_id,
                 'total_harga' => 0,
+                'diskon' => 0,
+                'total_harga_final' => 0,
                 'metode_pembayaran' => $request->metode_pembayaran,
                 'bayar' => $request->metode_pembayaran === 'cash' ? $request->bayar : null,
                 'kembalian' => 0,
                 'waktu_transaksi' => now(),
             ]);
 
-            // ================= PAKET CUCI =================
+            // ================= PAKET UTAMA =================
             $paketHarga = PaketHarga::with('paketCuci')->findOrFail($request->paket);
             $subtotalPaket = $paketHarga->harga;
 
@@ -78,33 +83,44 @@ class TransaksiController extends Controller
                 $paketTambahans = PaketTambahan::whereIn('id', $request->paket_tambahan)->get();
 
                 foreach ($paketTambahans as $pt) {
-                   TransaksiTambahan::create([
-    'transaksi_id' => $transaksi->id,
-    'paket_tambahan_id' => $pt->id,
-    'qty' => 1,
-    'harga' => $pt->harga,          // 🔥 PENTING
-    'subtotal' => $pt->harga * 1,   // optional tapi rapi
-]);
-
+                    TransaksiTambahan::create([
+                        'transaksi_id' => $transaksi->id,
+                        'paket_tambahan_id' => $pt->id,
+                        'qty' => 1,
+                        'harga' => $pt->harga,
+                        'subtotal' => $pt->harga,
+                    ]);
 
                     $totalTambahan += $pt->harga;
                 }
             }
 
-            // ================= TOTAL =================
+            // ================= TOTAL & DISKON =================
             $total = $subtotalPaket + $totalTambahan;
+            $diskon = 0;
+
+            if ($member) {
+                $totalTransaksiMember = Transaksi::where('member_id', $member->id)->count();
+
+                // diskon berlaku setelah 5x transaksi
+                if ($totalTransaksiMember >= 5) {
+                    $diskon = $total * 0.5;
+                }
+            }
+
+            $totalFinal = $total - $diskon;
             $bayar = (int) $request->bayar;
-            $kembalian = max(0, $bayar - $total);
+            $kembalian = max(0, $bayar - $totalFinal);
 
             $transaksi->update([
                 'total_harga' => $total,
+                'diskon' => $diskon,
+                'total_harga_final' => $totalFinal,
                 'bayar' => $request->metode_pembayaran === 'cash' ? $bayar : null,
                 'kembalian' => $request->metode_pembayaran === 'cash' ? $kembalian : null,
-                'metode_pembayaran' => $request->metode_pembayaran,
             ]);
         });
 
-        // QRIS
         if ($request->metode_pembayaran === 'transfer') {
             return view('transaksi.qris', [
                 'transaksi' => $transaksi,
@@ -121,6 +137,7 @@ class TransaksiController extends Controller
     {
         $transaksi = Transaksi::with([
             'kendaraan',
+            'member',
             'items.paketCuci',
             'items.paketHarga',
             'tambahans.paketTambahan',
@@ -129,44 +146,4 @@ class TransaksiController extends Controller
 
         return view('transaksi.struk', compact('transaksi'));
     }
-
-    public function cariMember(Request $request)
-    {
-        $q = $request->q;
-
-        $members = Member::with('kendaraan')
-            ->where('nama_member', 'like', "%$q%")
-            ->orWhere('kode_member', 'like', "%$q%")
-            ->get();
-
-        return response()->json(
-            $members->map(function ($m) {
-                return [
-                    'id' => $m->id,
-                    'kode_member' => $m->kode_member,
-                    'nama_pemilik' => $m->nama_member,
-                    'telepon' => $m->telepon,
-                    'kendaraan' => $m->kendaraan->map(function ($k) {
-                        return [
-                            'id' => $k->id,
-                            'no_plat' => $k->no_plat,
-                            'merk' => $k->merk,
-                            'model' => $k->model,
-                            'tipe_kendaraan_id' => $k->tipe_kendaraan_id
-                        ];
-                    })->values()
-                ];
-            })
-        );
-    }
-
-    public function paketByTipe($tipeId)
-    {
-        return PaketHarga::with('paketCuci')
-            ->where('tipe_kendaraan_id', $tipeId)
-            ->get();
-    }
-
-     
-
 }
