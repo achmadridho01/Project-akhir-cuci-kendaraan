@@ -71,6 +71,7 @@
     <form id="form-transaksi" method="POST" action="{{ route('transaksi.store') }}">
 
         @csrf
+           <input type="hidden" name="diskon" id="diskon" value="0">
 
         {{-- INFORMASI PELANGGAN --}}
         <div class="mb-4">
@@ -137,6 +138,7 @@
                 Total: <span id="total">Rp 0</span>
             </div>
         </div>
+        
 
         {{-- METODE PEMBAYARAN --}}
         <div class="mb-4">

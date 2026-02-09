@@ -12,11 +12,14 @@ class Transaksi extends Model
 
     protected $table = 'transaksi';
 
-   protected $fillable = [
+  protected $fillable = [
     'user_id',
     'kendaraan_id',
     'tipe_kendaraan_id',
     'member_id',
+    'nama_pelanggan',
+    'no_polisi',
+    'kode_member',
     'total_harga',
     'diskon',
     'bayar',
@@ -24,6 +27,7 @@ class Transaksi extends Model
     'metode_pembayaran',
     'waktu_transaksi',
 ];
+
 
 
     protected $casts = [

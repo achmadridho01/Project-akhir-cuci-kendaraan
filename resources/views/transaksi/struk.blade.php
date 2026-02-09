@@ -152,14 +152,7 @@
             </td>
         </tr>
 
-        <tr>
-            <td><strong>TOTAL BAYAR</strong></td>
-            <td class="right">
-                <strong>
-                    Rp {{ number_format($transaksi->total_harga_final,0,',','.') }}
-                </strong>
-            </td>
-        </tr>
+       
 
         <tr>
             <td>BAYAR</td>
@@ -183,10 +176,8 @@
     {{-- TANDA GRATIS --}}
     @if($transaksi->diskon >= $transaksi->total_harga && $transaksi->total_harga > 0)
         <div class="center" style="font-weight:bold; margin:6px 0;">
-            🎉 TRANSAKSI GRATIS<br>
-            <small>
-                {{ $transaksi->member ? 'Member' : 'Non Member' }}
-            </small>
+             <br>
+           
         </div>
         <hr>
     @endif
