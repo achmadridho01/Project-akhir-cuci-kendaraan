@@ -13,7 +13,6 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaketTambahanController;
 
-
 /*
 |--------------------------------------------------------------------------
 | REDIRECT AWAL
@@ -54,62 +53,55 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-        ->name('admin.dashboard')
-        ->middleware('role:admin');
+        ->middleware('role:admin')
+        ->name('admin.dashboard');
 
     Route::get('/kasir/dashboard', [DashboardController::class, 'index'])
-        ->name('kasir.dashboard')
-        ->middleware('role:kasir');
+        ->middleware('role:kasir')
+        ->name('kasir.dashboard');
 
     /*
     |--------------------------------------------------------------------------
-    | MEMBER (ADMIN & KASIR - FULL AKSES)
+    | MEMBER (ADMIN & KASIR)
     |--------------------------------------------------------------------------
     */
-   Route::middleware('role:admin,kasir')
-    ->prefix('member')      // URI: /member/...
-    ->name('member.')       // route name: member.xxx
-    ->group(function () {
+    Route::middleware('role:admin,kasir')
+        ->prefix('member')
+        ->name('member.')
+        ->group(function () {
 
-        // INDEX / CREATE / STORE / SHOW / EDIT / UPDATE / DESTROY
-        Route::get('/', [MemberController::class, 'index'])->name('index');
-        Route::get('/create', [MemberController::class, 'create'])->name('create');
-        Route::post('/store', [MemberController::class, 'store'])->name('store');
-        Route::get('/{id}', [MemberController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [MemberController::class, 'edit'])->name('edit');
-        Route::post('/{id}/update', [MemberController::class, 'update'])->name('update');
-        Route::delete('/{id}/delete', [MemberController::class, 'destroy'])->name('destroy');
+            Route::get('/', [MemberController::class, 'index'])->name('index');
+            Route::get('/create', [MemberController::class, 'create'])->name('create');
+            Route::post('/store', [MemberController::class, 'store'])->name('store');
+            Route::get('/{id}', [MemberController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [MemberController::class, 'edit'])->name('edit');
+            Route::post('/{id}/update', [MemberController::class, 'update'])->name('update');
+            Route::delete('/{id}/delete', [MemberController::class, 'destroy'])->name('destroy');
 
-        // KARTU MEMBER
-        Route::get('/{id}/card', [MemberController::class, 'card'])->name('card');
-
-        // PRINT MEMBER
-        Route::get('/{id}/print', [MemberController::class, 'print'])->name('print');
-});
-
+            Route::get('/{id}/card', [MemberController::class, 'card'])->name('card');
+            Route::get('/{id}/print', [MemberController::class, 'print'])->name('print');
+        });
 
     /*
     |--------------------------------------------------------------------------
     | KENDARAAN (ADMIN & KASIR)
     |--------------------------------------------------------------------------
     */
-   Route::middleware('role:admin,kasir')
-    ->prefix('kendaraan')
-    ->name('kendaraan.')
-    ->group(function () {
+    Route::middleware('role:admin,kasir')
+        ->prefix('kendaraan')
+        ->name('kendaraan.')
+        ->group(function () {
 
-        // 🔥 AUTOCOMPLETE MEMBER
-        Route::get('/search-nama', [KendaraanController::class, 'searchNama']);
-        Route::get('/{id}/detail', [KendaraanController::class, 'detail']);
+            Route::get('/search-nama', [KendaraanController::class, 'searchNama']);
+            Route::get('/{id}/detail', [KendaraanController::class, 'detail']);
 
-        // kendaraan biasa
-        Route::get('/', [KendaraanController::class, 'index'])->name('index');
-        Route::get('/tambah', [KendaraanController::class, 'create'])->name('create');
-        Route::post('/tambah', [KendaraanController::class, 'store'])->name('store');
-        Route::get('/edit/{id}', [KendaraanController::class, 'edit'])->name('edit');
-        Route::post('/edit/{id}', [KendaraanController::class, 'update'])->name('update');
-        Route::delete('/hapus/{id}', [KendaraanController::class, 'destroy'])->name('destroy');
-    });
+            Route::get('/', [KendaraanController::class, 'index'])->name('index');
+            Route::get('/tambah', [KendaraanController::class, 'create'])->name('create');
+            Route::post('/tambah', [KendaraanController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [KendaraanController::class, 'edit'])->name('edit');
+            Route::post('/edit/{id}', [KendaraanController::class, 'update'])->name('update');
+            Route::delete('/hapus/{id}', [KendaraanController::class, 'destroy'])->name('destroy');
+        });
 
     /*
     |--------------------------------------------------------------------------
@@ -156,45 +148,45 @@ Route::middleware('auth')->group(function () {
                 Route::post('/edit/{id}', [PaketHargaController::class, 'update'])->name('update');
                 Route::delete('/hapus/{id}', [PaketHargaController::class, 'destroy'])->name('destroy');
             });
-Route::prefix('paket_tambahan')->name('pakettambahan.')->group(function () {
-    Route::get('/', [PaketTambahanController::class, 'index'])->name('index'); // menampilkan tabel
-    Route::get('/tambah', [PaketTambahanController::class, 'create'])->name('create'); // form create
-    Route::post('/tambah', [PaketTambahanController::class, 'store'])->name('store'); // simpan baru
 
-    Route::get('/edit/{id}', [PaketTambahanController::class, 'edit'])->name('edit'); // form edit
-    Route::put('/update/{id}', [PaketTambahanController::class, 'update'])->name('update'); // simpan update
+            Route::prefix('paket-tambahan')->name('pakettambahan.')->group(function () {
+                Route::get('/', [PaketTambahanController::class, 'index'])->name('index');
+                Route::get('/tambah', [PaketTambahanController::class, 'create'])->name('create');
+                Route::post('/tambah', [PaketTambahanController::class, 'store'])->name('store');
+                Route::get('/edit/{id}', [PaketTambahanController::class, 'edit'])->name('edit');
+                Route::put('/update/{id}', [PaketTambahanController::class, 'update'])->name('update');
+                Route::delete('/hapus/{id}', [PaketTambahanController::class, 'destroy'])->name('destroy');
+            });
 
-    Route::delete('/hapus/{id}', [PaketTambahanController::class, 'destroy'])->name('destroy'); // hapus
-});
+            Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+            Route::get('/laporan/print', [LaporanController::class, 'print'])->name('laporan.print');
+        });
 
-
-            Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('laporan.index');
-
-    // ✅ TAMBAHKAN INI
-    Route::get('/laporan/print', 
-        [LaporanController::class, 'print']
-    )->name('laporan.print');
-
-});
     /*
     |--------------------------------------------------------------------------
     | TRANSAKSI (ADMIN & KASIR)
     |--------------------------------------------------------------------------
     */
-    Route::middleware('role:admin,kasir')->group(function () {
-        Route::get('/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
-        Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaksi.store');
-        Route::get('/transaksi/struk/{id}', [TransaksiController::class, 'struk'])->name('transaksi.struk');
-        Route::get('/transaksi/cari-pelanggan', [TransaksiController::class, 'cariPelanggan'])->name('transaksi.cariPelanggan');
-        Route::get('/transaksi/paket/{tipe}', [TransaksiController::class, 'paketByTipe'])->name('transaksi.paket');
-        Route::get('/transaksi/cari-member', [TransaksiController::class, 'cariMember']);
-        Route::get('/transaksi/paket-tambahan', function () {
-    return \App\Models\PaketTambahan::select('id','nama_tambahan','harga')->get();
+    Route::middleware('role:admin,kasir')
+        ->prefix('transaksi')
+        ->name('transaksi.')
+        ->group(function () {
+
+            Route::get('/create', [TransaksiController::class, 'create'])->name('create');
+            Route::post('/store', [TransaksiController::class, 'store'])->name('store');
+            Route::get('/struk/{id}', [TransaksiController::class, 'struk'])->name('struk');
+
+            // 🔥 AUTOCOMPLETE MEMBER
+            Route::get('/cari-member', [TransaksiController::class, 'cariMember'])
+                ->name('cariMember');
+
+            // 🔥 PAKET BY TIPE
+            Route::get('/paket/{tipe}', [TransaksiController::class, 'paketByTipe'])
+                ->name('paket');
+
+            // 🔥 PAKET TAMBAHAN
+            Route::get('/paket-tambahan', function () {
+                return \App\Models\PaketTambahan::select('id', 'nama_tambahan', 'harga')->get();
+            })->name('paketTambahan');
+        });
 });
-
-
-    });
-
-});
-

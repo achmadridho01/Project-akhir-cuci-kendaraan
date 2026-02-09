@@ -111,46 +111,60 @@
     </table>
 
     {{-- PAKET TAMBAHAN --}}
-   @if($transaksi->tambahans->count())
-<hr>
-<table>
-    <tr>
-        <td colspan="2"><strong>Paket Tambahan</strong></td>
-    </tr>
+    @if($transaksi->tambahans->count())
+    <hr>
+    <table>
+        <tr>
+            <td colspan="2"><strong>Paket Tambahan</strong></td>
+        </tr>
 
-    @foreach($transaksi->tambahans as $tambahan)
-    <tr>
-        <td colspan="2">
-            {{ $tambahan->paketTambahan?->nama_tambahan ?? 'Paket Tambahan' }}
-        </td>
-    </tr>
-    <tr>
-        <td>{{ $tambahan->qty }} x</td>
-        <td class="right">
-            Rp {{ number_format($tambahan->subtotal,0,',','.') }}
-        </td>
-    </tr>
-    @endforeach
-</table>
-@endif
-
+        @foreach($transaksi->tambahans as $tambahan)
+        <tr>
+            <td colspan="2">
+                {{ $tambahan->paketTambahan?->nama_tambahan ?? 'Paket Tambahan' }}
+            </td>
+        </tr>
+        <tr>
+            <td>{{ $tambahan->qty }} x</td>
+            <td class="right">
+                Rp {{ number_format($tambahan->subtotal,0,',','.') }}
+            </td>
+        </tr>
+        @endforeach
+    </table>
+    @endif
 
     <hr>
 
     {{-- TOTAL --}}
     <table>
         <tr>
-            <td><strong>TOTAL</strong></td>
+            <td><strong>SUBTOTAL</strong></td>
+            <td class="right">
+                Rp {{ number_format($transaksi->total_harga,0,',','.') }}
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>DISKON</strong></td>
+            <td class="right">
+                Rp {{ number_format($transaksi->diskon,0,',','.') }}
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>TOTAL BAYAR</strong></td>
             <td class="right">
                 <strong>
-                    Rp {{ number_format($transaksi->total_harga,0,',','.') }}
+                    Rp {{ number_format($transaksi->total_harga_final,0,',','.') }}
                 </strong>
             </td>
         </tr>
+
         <tr>
             <td>BAYAR</td>
             <td class="right">
-                Rp {{ number_format($transaksi->bayar,0,',','.') }}
+                Rp {{ number_format($transaksi->bayar ?? 0,0,',','.') }}
             </td>
         </tr>
 
@@ -158,13 +172,24 @@
         <tr>
             <td>KEMBALIAN</td>
             <td class="right">
-                Rp {{ number_format($transaksi->kembalian,0,',','.') }}
+                Rp {{ number_format($transaksi->kembalian ?? 0,0,',','.') }}
             </td>
         </tr>
         @endif
     </table>
 
     <hr>
+
+    {{-- TANDA GRATIS --}}
+    @if($transaksi->diskon >= $transaksi->total_harga && $transaksi->total_harga > 0)
+        <div class="center" style="font-weight:bold; margin:6px 0;">
+            🎉 TRANSAKSI GRATIS<br>
+            <small>
+                {{ $transaksi->member ? 'Member' : 'Non Member' }}
+            </small>
+        </div>
+        <hr>
+    @endif
 
     <div class="center">
         TERIMA KASIH<br>

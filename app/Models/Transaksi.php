@@ -6,69 +6,71 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TransaksiTambahan;
 
-
 class Transaksi extends Model
 {
     use HasFactory;
 
     protected $table = 'transaksi';
 
-    protected $fillable = [
+   protected $fillable = [
     'user_id',
     'kendaraan_id',
-    'nama_pelanggan',
-    'no_polisi',
     'tipe_kendaraan_id',
+    'member_id',
     'total_harga',
-    'metode_pembayaran',
+    'diskon',
     'bayar',
     'kembalian',
+    'metode_pembayaran',
     'waktu_transaksi',
 ];
 
- // ✅ INI KUNCINYA
+
     protected $casts = [
         'waktu_transaksi' => 'datetime',
     ];
 
-
-    // 🔗 RELASI KE KENDARAAN (INI YANG ERROR TADI)
+    // RELASI KE KENDARAAN
     public function kendaraan()
     {
         return $this->belongsTo(Kendaraan::class);
     }
 
-    // 🔗 RELASI KE TIPE KENDARAAN
+    // RELASI KE TIPE KENDARAAN
     public function tipeKendaraan()
     {
         return $this->belongsTo(TipeKendaraan::class);
     }
 
-    // 🔗 RELASI KE ITEM TRANSAKSI
+    // RELASI KE ITEM TRANSAKSI
     public function items()
     {
         return $this->hasMany(TransaksiItem::class);
     }
 
-    // 🔗 RELASI KE USER (KASIR)
+    // RELASI KE USER (KASIR)
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // RELASI KE MEMBER
+    public function member()
+    {
+        return $this->belongsTo(\App\Models\Member::class, 'member_id', 'id');
+    }
+
+    // RELASI KE PAKET TAMBAHAN
     public function paketTambahan()
-{
-    return $this->belongsToMany(
-        \App\Models\PaketTambahan::class,
-        'transaksi_tambahan'
-    )->withPivot('qty', 'subtotal');
-}
+    {
+        return $this->belongsToMany(
+            \App\Models\PaketTambahan::class,
+            'transaksi_tambahan'
+        )->withPivot('qty', 'subtotal');
+    }
 
-public function tambahans()
-{
-    return $this->hasMany(TransaksiTambahan::class, 'transaksi_id');
-}
-
-
-
+    public function tambahans()
+    {
+        return $this->hasMany(TransaksiTambahan::class, 'transaksi_id');
+    }
 }

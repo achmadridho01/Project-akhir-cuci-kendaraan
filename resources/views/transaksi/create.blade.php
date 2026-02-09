@@ -171,302 +171,312 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-    function formatRupiah(angka) {
-        return 'Rp ' + Number(angka || 0).toLocaleString('id-ID');
-    }
-
-    const namaInput = document.getElementById('nama_pelanggan');
-    const kodeInput = document.getElementById('kode_member');
-    const teleponInput = document.getElementById('telepon');
-    const noPlatInput = document.getElementById('no_plat');
-    const tipeSelect = document.getElementById('tipe_kendaraan');
-    const merkInput = document.getElementById('merk');
-    const merkContainer = document.getElementById('merk-container');
-
-    const box = document.getElementById('suggestion');
-    const boxKode = document.getElementById('suggestion-kode');
-
-    let kendaraanMember = [];
-
-    function tampilkanKendaraan(kendaraan) {
-        kendaraanMember = kendaraan || [];
-        merkContainer.innerHTML = '';
-
-        // Jika hanya 1 kendaraan → auto isi
-        if (kendaraanMember.length === 1) {
-            const k = kendaraanMember[0];
-            merkContainer.innerHTML = `<input type="text" id="merk" name="merk" class="form-control">`;
-            document.getElementById('merk').value = k.merk;
-            noPlatInput.value = k.no_plat;
-            tipeSelect.value = k.tipe_kendaraan_id;
-            tipeSelect.dispatchEvent(new Event('change'));
-            return;
+        function formatRupiah(angka) {
+            return 'Rp ' + Number(angka || 0).toLocaleString('id-ID');
         }
 
-        // Jika lebih dari 1 → buat dropdown
-        if (kendaraanMember.length > 1) {
-            let html = `<select id="pilih-kendaraan" class="form-select">
-                <option value="">Pilih Kendaraan</option>`;
-            kendaraanMember.forEach((k, i) => {
-                html += `<option value="${i}">${k.merk} - ${k.no_plat}</option>`;
-            });
-            html += `</select>`;
-            merkContainer.innerHTML = html;
+        const namaInput = document.getElementById('nama_pelanggan');
+        const kodeInput = document.getElementById('kode_member');
+        const teleponInput = document.getElementById('telepon');
+        const noPlatInput = document.getElementById('no_plat');
+        const tipeSelect = document.getElementById('tipe_kendaraan');
+        const merkInput = document.getElementById('merk');
+        const merkContainer = document.getElementById('merk-container');
 
-            document.getElementById('pilih-kendaraan').addEventListener('change', function () {
-                const k = kendaraanMember[this.value];
-                if (!k) return;
+        const box = document.getElementById('suggestion');
+        const boxKode = document.getElementById('suggestion-kode');
+
+        let kendaraanMember = [];
+
+        function tampilkanKendaraan(kendaraan) {
+            kendaraanMember = kendaraan || [];
+            merkContainer.innerHTML = '';
+
+            // Jika hanya 1 kendaraan → auto isi
+            if (kendaraanMember.length === 1) {
+                const k = kendaraanMember[0];
+                merkContainer.innerHTML = `<input type="text" id="merk" name="merk" class="form-control">`;
+                document.getElementById('merk').value = k.merk;
                 noPlatInput.value = k.no_plat;
                 tipeSelect.value = k.tipe_kendaraan_id;
                 tipeSelect.dispatchEvent(new Event('change'));
-            });
-        }
+                return;
+            }
 
-        // Jika tidak ada kendaraan
-        if (kendaraanMember.length === 0) {
-            merkContainer.innerHTML = `<input type="text" id="merk" name="merk" class="form-control">`;
+            // Jika lebih dari 1 → buat dropdown
+            if (kendaraanMember.length > 1) {
+                let html = `<select id="pilih-kendaraan" class="form-select">
+                    <option value="">Pilih Kendaraan</option>`;
+                kendaraanMember.forEach((k, i) => {
+                    html += `<option value="${i}">${k.merk} - ${k.no_plat}</option>`;
+                });
+                html += `</select>`;
+                merkContainer.innerHTML = html;
+
+                document.getElementById('pilih-kendaraan').addEventListener('change', function () {
+                    const k = kendaraanMember[this.value];
+                    if (!k) return;
+                    noPlatInput.value = k.no_plat;
+                    tipeSelect.value = k.tipe_kendaraan_id;
+                    tipeSelect.dispatchEvent(new Event('change'));
+                });
+            }
+
+            // Jika tidak ada kendaraan
+            if (kendaraanMember.length === 0) {
+                merkContainer.innerHTML = `<input type="text" id="merk" name="merk" class="form-control">`;
+            }
         }
-    }
 
     function pilihMember(d) {
-        namaInput.value = d.nama_pemilik || '';
-        kodeInput.value = d.kode_member || '';
-        teleponInput.value = d.telepon || '';
-        tampilkanKendaraan(d.kendaraan || []);
-        box.innerHTML = '';
-        boxKode.innerHTML = '';
-    }
+    namaInput.value = d.nama_pemilik || '';
+    teleponInput.value = d.telepon || '';
 
-    // AUTOCOMPLETE NAMA
-    namaInput.addEventListener('keyup', function () {
-        let q = this.value.trim();
-        if (q.length < 2) { box.innerHTML = ''; return; }
-
-        fetch(`/transaksi/cari-member?q=${encodeURIComponent(q)}`)
-            .then(r => r.json())
-            .then(data => {
-                box.innerHTML = '';
-                data.forEach(d => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'list-group-item list-group-item-action';
-                    btn.innerText = d.nama_pemilik + ' - ' + d.kode_member;
-                    btn.onclick = () => pilihMember(d);
-                    box.appendChild(btn);
-                });
-            });
-    });
-
-    // AUTOCOMPLETE KODE
-    kodeInput.addEventListener('keyup', function () {
-        let q = this.value.trim();
-        if (q.length < 2) { boxKode.innerHTML = ''; return; }
-
-        fetch(`/transaksi/cari-member?q=${encodeURIComponent(q)}`)
-            .then(r => r.json())
-            .then(data => {
-                boxKode.innerHTML = '';
-                data.forEach(d => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'list-group-item list-group-item-action';
-                    btn.innerText = d.kode_member + ' - ' + d.nama_pemilik;
-                    btn.onclick = () => pilihMember(d);
-                    boxKode.appendChild(btn);
-                });
-            });
-    });
-
-    // ====== PAKET ======
-    const paketArea = document.getElementById('paket-area');
-    const ringkasan = document.getElementById('ringkasan');
-    const totalEl = document.getElementById('total');
-
-    tipeSelect.addEventListener('change', function () {
-        paketArea.innerHTML = '';
-        ringkasan.innerHTML = '';
-        totalEl.innerText = formatRupiah(0);
-        if (!this.value) return;
-
-        fetch(`/transaksi/paket/${this.value}`)
-            .then(r => r.json())
-            .then(data => {
-                data.forEach(p => {
-                    paketArea.insertAdjacentHTML('beforeend', `
-                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                            <label class="custom-radio mb-0">
-                                <input type="radio" name="paket" class="paket-radio"
-                                    data-nama="${p.paket_cuci.nama_paket}"
-                                    data-harga="${p.harga}"
-                                    value="${p.id}">
-                                <span class="radio-circle"></span>
-                                ${p.paket_cuci.nama_paket}
-                            </label>
-                            <strong>${formatRupiah(p.harga)}</strong>
-                        </div>
-                    `);
-                });
-            });
-    });
-
-    document.addEventListener('change', function (e) {
-        if (!e.target.classList.contains('paket-radio')) return;
-        const harga = parseInt(e.target.dataset.harga);
-        ringkasan.innerHTML = `<div>${e.target.dataset.nama} <span class="float-end">${formatRupiah(harga)}</span></div>`;
-        totalEl.innerText = formatRupiah(harga);
-    });
-
-   // ===== PAKET TAMBAHAN =====
-const paketTambahanArea = document.getElementById('paket-tambahan-area');
-
-fetch('/transaksi/paket-tambahan')
-.then(r => r.json())
-.then(data => {
-    paketTambahanArea.innerHTML = '';
-
-    data.forEach(p => {
-        paketTambahanArea.insertAdjacentHTML('beforeend', `
-            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                <label class="custom-radio mb-0">
-                    <input type="checkbox"
-                           name="paket_tambahan[]"
-                           class="paket-tambahan"
-                           value="${p.id}"
-                           data-nama="${p.nama_tambahan}"
-                           data-harga="${p.harga}">
-                    <span class="radio-circle"></span>
-                    ${p.nama_tambahan}
-                </label>
-                <strong>${formatRupiah(p.harga)}</strong>
-            </div>
-        `);
-    });
-});
-
-// ===== HITUNG TOTAL (PAKET + TAMBAHAN) =====
-document.addEventListener('change', function () {
-    let total = 0;
-    ringkasan.innerHTML = '';
-
-    const paket = document.querySelector('.paket-radio:checked');
-    if (paket) {
-        total += parseInt(paket.dataset.harga);
-        ringkasan.innerHTML += `<div>${paket.dataset.nama} <span class="float-end">${formatRupiah(paket.dataset.harga)}</span></div>`;
-    }
-
-    document.querySelectorAll('.paket-tambahan:checked').forEach(el => {
-        total += parseInt(el.dataset.harga);
-        ringkasan.innerHTML += `<div>${el.dataset.nama} <span class="float-end">${formatRupiah(el.dataset.harga)}</span></div>`;
-    });
-
-    totalEl.innerText = formatRupiah(total);
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    const bayarInput = document.getElementById('bayar');
-    const kembalianEl = document.getElementById('kembalian');
-    const totalEl = document.getElementById('total');
-
-    const cashRadio = document.querySelector('input[name="metode_pembayaran"][value="cash"]');
-    const transferRadio = document.querySelector('input[name="metode_pembayaran"][value="transfer"]');
-
-    function getTotalAngka() {
-        return parseInt(totalEl.innerText.replace(/[^0-9]/g, '')) || 0;
-    }
-
-    function hitungKembalian() {
-        if (!cashRadio.checked) return;
-
-        const bayar = parseInt(bayarInput.value) || 0;
-        const total = getTotalAngka();
-        const kembalian = bayar - total;
-
-        kembalianEl.innerText = kembalian > 0
-            ? formatRupiah(kembalian)
-            : 'Rp 0';
-    }
-
-    // Input nominal
-    bayarInput.addEventListener('input', hitungKembalian);
-
-    // Toggle metode pembayaran
-    const cashArea = document.getElementById('cash-area');
-
-function toggleBayar() {
-    if (cashRadio.checked) {
-        cashArea.style.display = 'block'; // tampil
-        bayarInput.disabled = false;
-        hitungKembalian();
+    // ✅ hanya isi kode member kalau ADA
+    if (d.kode_member && d.kode_member !== '') {
+        kodeInput.value = d.kode_member;
+        kodeInput.readOnly = true; // optional, biar ga keedit
     } else {
-        cashArea.style.display = 'none'; // sembunyi
-        bayarInput.disabled = true;
-        bayarInput.value = '';
+        kodeInput.value = '';
+        kodeInput.readOnly = false;
     }
+
+    tampilkanKendaraan(d.kendaraan || []);
+    box.innerHTML = '';
+    boxKode.innerHTML = '';
 }
 
+        // AUTOCOMPLETE NAMA
+        namaInput.addEventListener('keyup', function () {
+            let q = this.value.trim();
+            if (q.length < 2) { box.innerHTML = ''; return; }
 
-    cashRadio.addEventListener('change', toggleBayar);
-    transferRadio.addEventListener('change', toggleBayar);
+            fetch(`/transaksi/cari-member?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    box.innerHTML = '';
+                    data.forEach(d => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'list-group-item list-group-item-action';
+                        btn.innerText = d.nama_pemilik + ' - ' + d.kode_member;
+                      btn.onclick = () => pilihMember(d, false);
+                        box.appendChild(btn);
+                    });
+                });
+        });
 
-    // Update kembalian saat total berubah
-    document.addEventListener('change', function () {
-        hitungKembalian();
+        // AUTOCOMPLETE KODE
+        kodeInput.addEventListener('keyup', function () {
+            let q = this.value.trim();
+            if (q.length < 2) { boxKode.innerHTML = ''; return; }
+
+            fetch(`/transaksi/cari-member?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    boxKode.innerHTML = '';
+                    data.forEach(d => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'list-group-item list-group-item-action';
+                        btn.innerText = d.kode_member + ' - ' + d.nama_pemilik;
+                btn.onclick = () => pilihMember(d, true);
+
+                        boxKode.appendChild(btn);
+                    });
+                });
+        });
+
+        // ====== PAKET ======
+        const paketArea = document.getElementById('paket-area');
+        const ringkasan = document.getElementById('ringkasan');
+        const totalEl = document.getElementById('total');
+
+        tipeSelect.addEventListener('change', function () {
+            paketArea.innerHTML = '';
+            ringkasan.innerHTML = '';
+            totalEl.innerText = formatRupiah(0);
+            if (!this.value) return;
+
+            fetch(`/transaksi/paket/${this.value}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(p => {
+                        paketArea.insertAdjacentHTML('beforeend', `
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                <label class="custom-radio mb-0">
+                                    <input type="radio" name="paket" class="paket-radio"
+                                        data-nama="${p.paket_cuci.nama_paket}"
+                                        data-harga="${p.harga}"
+                                        value="${p.id}">
+                                    <span class="radio-circle"></span>
+                                    ${p.paket_cuci.nama_paket}
+                                </label>
+                                <strong>${formatRupiah(p.harga)}</strong>
+                            </div>
+                        `);
+                    });
+                });
+        });
+
+        document.addEventListener('change', function (e) {
+            if (!e.target.classList.contains('paket-radio')) return;
+            const harga = parseInt(e.target.dataset.harga);
+            ringkasan.innerHTML = `<div>${e.target.dataset.nama} <span class="float-end">${formatRupiah(harga)}</span></div>`;
+            totalEl.innerText = formatRupiah(harga);
+        });
+
+    // ===== PAKET TAMBAHAN =====
+    const paketTambahanArea = document.getElementById('paket-tambahan-area');
+
+    fetch('/transaksi/paket-tambahan')
+    .then(r => r.json())
+    .then(data => {
+        paketTambahanArea.innerHTML = '';
+
+        data.forEach(p => {
+            paketTambahanArea.insertAdjacentHTML('beforeend', `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                    <label class="custom-radio mb-0">
+                        <input type="checkbox"
+                            name="paket_tambahan[]"
+                            class="paket-tambahan"
+                            value="${p.id}"
+                            data-nama="${p.nama_tambahan}"
+                            data-harga="${p.harga}">
+                        <span class="radio-circle"></span>
+                        ${p.nama_tambahan}
+                    </label>
+                    <strong>${formatRupiah(p.harga)}</strong>
+                </div>
+            `);
+        });
     });
 
-    // Init
-    toggleBayar();
+    // ===== HITUNG TOTAL (PAKET + TAMBAHAN) =====
+    document.addEventListener('change', function () {
+        let total = 0;
+        ringkasan.innerHTML = '';
 
-});
+        const paket = document.querySelector('.paket-radio:checked');
+        if (paket) {
+            total += parseInt(paket.dataset.harga);
+            ringkasan.innerHTML += `<div>${paket.dataset.nama} <span class="float-end">${formatRupiah(paket.dataset.harga)}</span></div>`;
+        }
 
-});
+        document.querySelectorAll('.paket-tambahan:checked').forEach(el => {
+            total += parseInt(el.dataset.harga);
+            ringkasan.innerHTML += `<div>${el.dataset.nama} <span class="float-end">${formatRupiah(el.dataset.harga)}</span></div>`;
+        });
+
+        totalEl.innerText = formatRupiah(total);
+    });
 
 
-document.getElementById('form-transaksi').addEventListener('submit', function (e) {
-    const cashRadio = document.querySelector('input[name="metode_pembayaran"][value="cash"]');
-    const bayarInput = document.getElementById('bayar');
-    const total = parseInt(
-        document.getElementById('total').innerText.replace(/[^0-9]/g, '')
-    ) || 0;
-    const bayar = parseInt(bayarInput.value) || 0;
+    document.addEventListener('DOMContentLoaded', function () {
 
-    if (!cashRadio.checked) return;
+        const bayarInput = document.getElementById('bayar');
+        const kembalianEl = document.getElementById('kembalian');
+        const totalEl = document.getElementById('total');
 
-    // 🔴 Nominal kosong
-    if (!bayarInput.value) {
-        e.preventDefault();
-        Swal.fire({
-            position: 'center',
-            icon: 'warning',
-            title: 'Nominal wajib diisi',
-            text: 'Silakan masukkan nominal pembayaran',
-            confirmButtonText: 'OK',
-            allowOutsideClick: false
-        }).then(() => bayarInput.focus());
-        return;
+        const cashRadio = document.querySelector('input[name="metode_pembayaran"][value="cash"]');
+        const transferRadio = document.querySelector('input[name="metode_pembayaran"][value="transfer"]');
+
+        function getTotalAngka() {
+            return parseInt(totalEl.innerText.replace(/[^0-9]/g, '')) || 0;
+        }
+
+        function hitungKembalian() {
+            if (!cashRadio.checked) return;
+
+            const bayar = parseInt(bayarInput.value) || 0;
+            const total = getTotalAngka();
+            const kembalian = bayar - total;
+
+            kembalianEl.innerText = kembalian > 0
+                ? formatRupiah(kembalian)
+                : 'Rp 0';
+        }
+
+        // Input nominal
+        bayarInput.addEventListener('input', hitungKembalian);
+
+        // Toggle metode pembayaran
+        const cashArea = document.getElementById('cash-area');
+
+    function toggleBayar() {
+        if (cashRadio.checked) {
+            cashArea.style.display = 'block'; // tampil
+            bayarInput.disabled = false;
+            hitungKembalian();
+        } else {
+            cashArea.style.display = 'none'; // sembunyi
+            bayarInput.disabled = true;
+            bayarInput.value = '';
+        }
     }
 
-    // 🔴 Nominal kurang
-    if (bayar < total) {
-        e.preventDefault();
-        Swal.fire({
-            position: 'center',
-            icon: 'error',
-            title: 'Nominal kurang',
-            text: 'Nominal pembayaran lebih kecil dari total transaksi',
-            confirmButtonText: 'OK',
-            allowOutsideClick: false
-        }).then(() => bayarInput.focus());
-    }
-});
+
+        cashRadio.addEventListener('change', toggleBayar);
+        transferRadio.addEventListener('change', toggleBayar);
+
+        // Update kembalian saat total berubah
+        document.addEventListener('change', function () {
+            hitungKembalian();
+        });
+
+        // Init
+        toggleBayar();
+
+    });
+
+    });
 
 
-</script>
+    document.getElementById('form-transaksi').addEventListener('submit', function (e) {
+        const cashRadio = document.querySelector('input[name="metode_pembayaran"][value="cash"]');
+        const bayarInput = document.getElementById('bayar');
+        const total = parseInt(
+            document.getElementById('total').innerText.replace(/[^0-9]/g, '')
+        ) || 0;
+        const bayar = parseInt(bayarInput.value) || 0;
 
-@endpush
+        if (!cashRadio.checked) return;
+
+        // 🔴 Nominal kosong
+        if (!bayarInput.value) {
+            e.preventDefault();
+            Swal.fire({
+                position: 'center',
+                icon: 'warning',
+                title: 'Nominal wajib diisi',
+                text: 'Silakan masukkan nominal pembayaran',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false
+            }).then(() => bayarInput.focus());
+            return;
+        }
+
+        // 🔴 Nominal kurang
+        if (bayar < total) {
+            e.preventDefault();
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Nominal kurang',
+                text: 'Nominal pembayaran lebih kecil dari total transaksi',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false
+            }).then(() => bayarInput.focus());
+        }
+    });
+
+
+    </script>
+
+    @endpush
 

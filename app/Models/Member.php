@@ -15,4 +15,10 @@ class Member extends Model
     {
         return $this->hasMany(Kendaraan::class);
     }
+
+    public function transaksis()
+{
+    return $this->hasMany(\App\Models\Transaksi::class, 'member_id');
+}
+
 }
