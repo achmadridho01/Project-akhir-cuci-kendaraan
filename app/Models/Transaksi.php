@@ -77,4 +77,17 @@ class Transaksi extends Model
     {
         return $this->hasMany(TransaksiTambahan::class, 'transaksi_id');
     }
+
+    
+    public function rating()
+    {
+        return $this->hasOne(Rating::class);
+    }
+
+    public function kasir()
+{
+    return $this->belongsTo(User::class, 'user_id'); 
+
+}
+
 }

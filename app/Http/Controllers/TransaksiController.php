@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 use App\Models\TransaksiTambahan;
@@ -12,12 +13,15 @@ use App\Models\PaketHarga;
 use App\Models\PaketTambahan;
 use App\Models\Member;
 
+
 class TransaksiController extends Controller
 {
     public function create()
     {
         return view('transaksi.create');
     }
+
+    
 
     public function store(Request $request)
     {
@@ -137,9 +141,10 @@ class TransaksiController extends Controller
             ]);
         }
 
-        return redirect()
-            ->route('transaksi.struk', $transaksi->id)
-            ->with('success', 'Transaksi berhasil');
+return redirect()
+    ->route('transaksi.struk', $transaksi->id)
+    ->with('success', 'Transaksi berhasil');
+
     }
 
     // ================= STRUK =================
@@ -191,4 +196,6 @@ class TransaksiController extends Controller
             ->where('tipe_kendaraan_id', $tipeId)
             ->get();
     }
+
+    
 }

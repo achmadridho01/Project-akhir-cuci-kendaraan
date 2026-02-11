@@ -112,6 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
     <a href="{{ route('admin.paketharga.index') }}" class="menu-item">Paket Harga</a>
     <a href="{{ route('admin.pakettambahan.index') }}" class="menu-item">Paket Tambahan</a>
     <a href="{{ route('admin.laporan.index') }}" class="menu-item">Laporan</a>
+    <a href="{{ route('admin.rekap_rating') }}"class="menu-item"> Rekap Rating</a>
+
 @endif
 
       

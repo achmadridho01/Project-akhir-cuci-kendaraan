@@ -49,6 +49,11 @@ class User extends Authenticatable
         return $this->hasMany(Transaksi::class);
     }
 
+     public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | ROLE HELPERS (UNTUK KENDARAAN)

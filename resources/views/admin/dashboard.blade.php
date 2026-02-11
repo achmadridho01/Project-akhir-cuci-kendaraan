@@ -48,7 +48,7 @@ h4::before {
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold">📊 Dashboard Admin</h3>
+    <h3 class="fw-bold">📊 Dashboard </h3>
     <a href="{{ route('logout') }}" class="btn btn-danger shadow-sm">
         🚪 Logout
     </a>

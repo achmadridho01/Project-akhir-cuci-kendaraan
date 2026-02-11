@@ -186,13 +186,43 @@
         TERIMA KASIH<br>
         SELAMAT JALAN
     </div>
+<div class="actions">
+    <button onclick="window.print()">Cetak</button>
+    <a href="{{ route('dashboard') }}" class="btn">Kembali</a>
 
-    <div class="actions">
-        <button onclick="window.print()">Cetak</button>
-        <a href="{{ route('dashboard') }}" class="btn">Kembali</a>
-    </div>
-
+    @if(auth()->user()->role === 'kasir')
+    <!-- Rating hanya tampil di layar, tidak tercetak -->
+    <a href="{{ route('rating.create', $transaksi->id) }}" class="btn btn">
+        Beri Rating Pelayanan Kasir
+    </a>
+    @endif
 </div>
+
+<style>
+@media print {
+    .actions {
+        display: none; /* semua tombol di actions tidak dicetak */
+    }
+}
+.actions {
+    text-align: center;
+    margin-top: 12px;
+}
+.actions .btn {
+    display: inline-block;
+    margin: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+    text-decoration: none;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+}
+</style>
+
 
 </body>
 </html>
+
+

@@ -12,6 +12,8 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaketTambahanController;
+use App\Http\Controllers\RatingController;
+use App\Http\Controllers\RekapRatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -160,6 +162,12 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('/laporan/print', [LaporanController::class, 'print'])->name('laporan.print');
+
+Route::get('/rekap_rating', [RekapRatingController::class, 'index'])
+    ->name('rekap_rating');
+   
+
+
         });
 
     /*
@@ -189,4 +197,10 @@ Route::middleware('auth')->group(function () {
                 return \App\Models\PaketTambahan::select('id', 'nama_tambahan', 'harga')->get();
             })->name('paketTambahan');
         });
+
+      Route::middleware(['auth'])->group(function () {
+    Route::get('/rating/{id}', [RatingController::class, 'create'])->name('rating.create');
+    Route::post('/rating/{id}', [RatingController::class, 'store'])->name('rating.store');
+});
+
 });
